@@ -8,18 +8,15 @@ on:
         required: true
         default: '2.11.1'
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    env:
-      ATOP_VERSION: ${{ github.event.inputs.atop_version }}
+env:
+  ATOP_VERSION: ${{ github.event.inputs.atop_version }}
 
+jobs:
+  build-deb:
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
 
       - name: Build .deb package
         run: |
@@ -29,6 +26,18 @@ jobs:
           docker cp "$container_id":/build/. ./build-deb
           docker rm "$container_id"
 
+      - name: Upload .deb artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: atop-deb-${{ env.ATOP_VERSION }}
+          path: build-deb/
+
+  build-rpm:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Build .rpm package
         run: |
           docker build --build-arg ATOP_VERSION=$ATOP_VERSION -f Dockerfile.rpm -t atop-rpm-builder .
@@ -36,12 +45,6 @@ jobs:
           mkdir -p build-rpm
           docker cp "$container_id":/build/. ./build-rpm
           docker rm "$container_id"
-
-      - name: Upload .deb artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: atop-deb-${{ env.ATOP_VERSION }}
-          path: build-deb/
 
       - name: Upload .rpm artifact
         uses: actions/upload-artifact@v4
