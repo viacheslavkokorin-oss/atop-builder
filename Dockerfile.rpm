@@ -47,7 +47,6 @@ Version: ${ATOP_VERSION}
 Release: 1%{?dist}
 Summary: Advanced interactive monitor for Linux-systems
 License: GPL
-Maintainer: Gerlof Langeveld
 URL: https://www.atoptool.nl
 Source0: atop-${ATOP_VERSION}-bin.tar.gz
 BuildArch: x86_64
