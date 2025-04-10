@@ -1,0 +1,37 @@
+FROM debian:12
+
+ARG ATOP_VERSION=2.11.1
+ENV ATOP_VERSION=${ATOP_VERSION}
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Europe/Amsterdam
+
+RUN apt update && apt install -y \
+    build-essential wget pkg-config git make zlib1g-dev \
+    libncurses5-dev libglib2.0-dev fakeroot dpkg-dev vim
+
+WORKDIR /usr/src
+RUN wget https://www.atoptool.nl/download/atop-${ATOP_VERSION}.tar.gz \
+ && tar xzf atop-${ATOP_VERSION}.tar.gz
+
+WORKDIR /usr/src/atop-${ATOP_VERSION}
+RUN make \
+ && mkdir -p /tmp/atop-installroot \
+ && mkdir -p /build \
+ && make install DESTDIR=/tmp/atop-installroot
+
+RUN mkdir -p /tmp/atop-installroot/DEBIAN
+RUN cat > /tmp/atop-installroot/DEBIAN/control <<EOF
+Package: atop
+Version: ${ATOP_VERSION}
+Section: admin
+Priority: optional
+Architecture: amd64
+Maintainer: Gerlof Langeveld
+Homepage: https://www.atoptool.nl
+Description: Advanced interactive system process monitor
+Depends: libc6, zlib1g, libncurses6, libglib2.0-0
+EOF
+
+RUN dpkg-deb --build /tmp/atop-installroot /build/atop_${ATOP_VERSION}_amd64.deb
+
+CMD ["/bin/bash"]
