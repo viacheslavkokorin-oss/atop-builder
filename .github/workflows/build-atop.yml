@@ -1,4 +1,4 @@
-name: Build Atop Artifacts
+name: 📦 Build Atop Linux Packages (.deb & .rpm)
 
 on:
   workflow_dispatch:
@@ -13,12 +13,13 @@ env:
 
 jobs:
   build-deb:
+    name: 🏗️ Building .deb package
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Build .deb package
+      - name: Build .deb file for atop ${{ env.ATOP_VERSION }}
         run: |
           docker build --build-arg ATOP_VERSION=$ATOP_VERSION -f Dockerfile.deb -t atop-deb-builder .
           container_id=$(docker create atop-deb-builder)
@@ -33,12 +34,13 @@ jobs:
           path: build-deb/
 
   build-rpm:
+    name: 🏗️ Building .rpm package
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Build .rpm package
+      - name: Build .rpm file for atop ${{ env.ATOP_VERSION }}
         run: |
           docker build --build-arg ATOP_VERSION=$ATOP_VERSION -f Dockerfile.rpm -t atop-rpm-builder .
           container_id=$(docker create atop-rpm-builder)
