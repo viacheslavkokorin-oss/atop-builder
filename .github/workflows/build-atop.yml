@@ -1,0 +1,50 @@
+name: Build Atop Artifacts
+
+on:
+  workflow_dispatch:
+    inputs:
+      atop_version:
+        description: 'Version of atop to build'
+        required: true
+        default: '2.11.1'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      ATOP_VERSION: ${{ github.event.inputs.atop_version }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build .deb package
+        run: |
+          docker build --build-arg ATOP_VERSION=$ATOP_VERSION -f Dockerfile.deb -t atop-deb-builder .
+          container_id=$(docker create atop-deb-builder)
+          mkdir -p build-deb
+          docker cp "$container_id":/build/. ./build-deb
+          docker rm "$container_id"
+
+      - name: Build .rpm package
+        run: |
+          docker build --build-arg ATOP_VERSION=$ATOP_VERSION -f Dockerfile.rpm -t atop-rpm-builder .
+          container_id=$(docker create atop-rpm-builder)
+          mkdir -p build-rpm
+          docker cp "$container_id":/build/. ./build-rpm
+          docker rm "$container_id"
+
+      - name: Upload .deb artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: atop-deb-${{ env.ATOP_VERSION }}
+          path: build-deb/
+
+      - name: Upload .rpm artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: atop-rpm-${{ env.ATOP_VERSION }}
+          path: build-rpm/
