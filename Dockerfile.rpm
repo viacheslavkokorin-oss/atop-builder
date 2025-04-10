@@ -1,6 +1,6 @@
 FROM rockylinux:8
 
-ARG ATOP_VERSION=2.11.1
+ARG ATOP_VERSION
 
 # Install required RPM build and compilation tools
 RUN dnf install -y \
