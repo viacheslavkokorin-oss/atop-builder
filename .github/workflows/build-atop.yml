@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       atop_version:
-        description: 'Version of atop to build'
+        description: "Version of atop to build"
         required: true
-        default: '2.11.1'
+        default: "2.11.1"
 
 env:
   ATOP_VERSION: ${{ github.event.inputs.atop_version }}
@@ -33,8 +33,8 @@ jobs:
           name: atop-deb-${{ env.ATOP_VERSION }}
           path: build-deb/
 
-  build-rpm:
-    name: 🏗️ Building .rpm package
+  build-rpm8:
+    name: 🏗️ Building .rpm package for EL8
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -42,7 +42,28 @@ jobs:
 
       - name: Build .rpm file for atop ${{ env.ATOP_VERSION }}
         run: |
-          docker build --build-arg ATOP_VERSION=$ATOP_VERSION -f Dockerfile.rpm -t atop-rpm-builder .
+          docker build --build-arg ATOP_VERSION=$ATOP_VERSION -f Dockerfile8.rpm -t atop-rpm-builder .
+          container_id=$(docker create atop-rpm-builder)
+          mkdir -p build-rpm
+          docker cp "$container_id":/build/. ./build-rpm
+          docker rm "$container_id"
+
+      - name: Upload .rpm artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: atop-rpm-${{ env.ATOP_VERSION }}
+          path: build-rpm/
+
+  build-rpm9:
+    name: 🏗️ Building .rpm package for EL9
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build .rpm file for atop ${{ env.ATOP_VERSION }}
+        run: |
+          docker build --build-arg ATOP_VERSION=$ATOP_VERSION -f Dockerfile9.rpm -t atop-rpm-builder .
           container_id=$(docker create atop-rpm-builder)
           mkdir -p build-rpm
           docker cp "$container_id":/build/. ./build-rpm

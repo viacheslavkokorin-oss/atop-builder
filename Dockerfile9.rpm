@@ -1,0 +1,97 @@
+FROM rockylinux:9
+
+ARG ATOP_VERSION
+
+# Install required RPM build and compilation tools
+RUN dnf install -y \
+        rpm-build \
+        rpmdevtools \
+        gcc \
+        make \
+        wget \
+        glib2-devel \
+        zlib-devel \
+        ncurses-devel \
+        systemd-rpm-macros \
+    && dnf clean all
+
+# Set RPM dist macro clearly (el9)
+RUN echo '%dist .el8' >> ~/.rpmmacros
+
+# Create RPM build environment
+RUN rpmdev-setuptree
+
+# Download atop source code
+WORKDIR /root
+RUN wget https://www.atoptool.nl/download/atop-${ATOP_VERSION}.tar.gz \
+    && tar xvzf atop-${ATOP_VERSION}.tar.gz
+
+# Compile atop
+WORKDIR /root/atop-${ATOP_VERSION}
+RUN make \
+    && make install DESTDIR=/tmp/atop-installroot
+
+# Adjust systemd paths to RPM-standard location (avoid inter-device Docker moves with cp -a)
+RUN mkdir -p /tmp/atop-installroot/usr/lib \
+    && cp -a /tmp/atop-installroot/lib/systemd /tmp/atop-installroot/usr/lib/ \
+    && rm -rf /tmp/atop-installroot/lib
+
+# Create tarball with installed files for rpmbuild
+RUN cd /tmp/atop-installroot \
+    && tar czf ~/rpmbuild/SOURCES/atop-${ATOP_VERSION}-bin.tar.gz *
+
+# Write a correct .spec file (with the fixes applied)
+RUN cat > ~/rpmbuild/SPECS/atop.spec <<EOF
+Name: atop
+Version: ${ATOP_VERSION}
+Release: 1%{?dist}
+Summary: Advanced interactive monitor for Linux-systems
+License: GPL
+URL: https://www.atoptool.nl
+Source0: atop-${ATOP_VERSION}-bin.tar.gz
+BuildArch: x86_64
+
+Requires: zlib, ncurses, glib2, systemd
+
+# Disable debug packages
+%define debug_package %{nil}
+
+%description
+Atop is an advanced interactive monitor for viewing load on a Linux system.
+
+%prep
+%setup -q -c -n %{name}-%{version}
+
+%build
+
+%install
+cp -a * %{buildroot}/
+# Remove duplicate atop binary with version suffix to prevent build-id duplicate error
+rm -f %{buildroot}/usr/bin/atop-%{version}
+
+%files
+%defattr(-,root,root,-)
+/usr/bin/*
+/usr/sbin/*
+/usr/share/man/man?/*
+/etc/default/*
+/usr/lib/systemd/system/*
+/usr/lib/systemd/system-sleep/*
+/var/log/atop
+
+%post
+%systemd_post atop.service atopacct.service atopgpu.service atop-rotate.service atop-rotate.timer
+
+%preun
+%systemd_preun atop.service atopacct.service atopgpu.service atop-rotate.service atop-rotate.timer
+
+%postun
+%systemd_postun_with_restart atop.service atopacct.service atopgpu.service atop-rotate.service atop-rotate.timer
+EOF
+
+# Build RPM package (actual artifact creation)
+RUN rpmbuild -bb ~/rpmbuild/SPECS/atop.spec \
+  && mkdir -p /build \
+  && cp /root/rpmbuild/RPMS/x86_64/atop-${ATOP_VERSION}-1.el8.x86_64.rpm /build/
+
+CMD ["/bin/bash"]
