@@ -1,9 +1,13 @@
-FROM rockylinux:9
+FROM rockylinux:9.4
 
 ARG ATOP_VERSION
 
+# Set RPM dist macro clearly (el9)
+RUN echo '%dist .el9' >> ~/.rpmmacros
+
 # Install required RPM build and compilation tools
-RUN dnf install -y \
+RUN dnf update \
+    && dnf install -y \
         rpm-build \
         rpmdevtools \
         gcc \
@@ -14,9 +18,6 @@ RUN dnf install -y \
         ncurses-devel \
         systemd-rpm-macros \
     && dnf clean all
-
-# Set RPM dist macro clearly (el9)
-RUN echo '%dist .el8' >> ~/.rpmmacros
 
 # Create RPM build environment
 RUN rpmdev-setuptree
@@ -92,6 +93,6 @@ EOF
 # Build RPM package (actual artifact creation)
 RUN rpmbuild -bb ~/rpmbuild/SPECS/atop.spec \
   && mkdir -p /build \
-  && cp /root/rpmbuild/RPMS/x86_64/atop-${ATOP_VERSION}-1.el8.x86_64.rpm /build/
+  && cp /root/rpmbuild/RPMS/x86_64/atop-${ATOP_VERSION}-1.el9.x86_64.rpm /build/
 
 CMD ["/bin/bash"]
