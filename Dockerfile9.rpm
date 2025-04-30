@@ -6,7 +6,8 @@ ARG ATOP_VERSION
 RUN echo '%dist .el9' >> ~/.rpmmacros
 
 # Install required RPM build and compilation tools
-RUN dnf install -y \
+RUN dnf -y update \
+    && dnf install -y \
         rpm-build \
         rpmdevtools \
         gcc \
