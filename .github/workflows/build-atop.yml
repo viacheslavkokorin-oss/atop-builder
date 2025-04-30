@@ -42,8 +42,8 @@ jobs:
 
       - name: Build .rpm file for atop ${{ env.ATOP_VERSION }}
         run: |
-          docker build --build-arg ATOP_VERSION=$ATOP_VERSION -f Dockerfile8.rpm -t atop-rpm-builder .
-          container_id=$(docker create atop-rpm-builder)
+          docker build --build-arg ATOP_VERSION=$ATOP_VERSION -f Dockerfile8.rpm -t atop-rpm8-builder .
+          container_id=$(docker create atop-rpm8-builder)
           mkdir -p build-rpm
           docker cp "$container_id":/build/. ./build-rpm
           docker rm "$container_id"
@@ -51,7 +51,7 @@ jobs:
       - name: Upload .rpm artifact
         uses: actions/upload-artifact@v4
         with:
-          name: atop-rpm-${{ env.ATOP_VERSION }}
+          name: atop-rpm8-${{ env.ATOP_VERSION }}
           path: build-rpm/
 
   build-rpm9:
@@ -63,8 +63,8 @@ jobs:
 
       - name: Build .rpm file for atop ${{ env.ATOP_VERSION }}
         run: |
-          docker build --build-arg ATOP_VERSION=$ATOP_VERSION -f Dockerfile9.rpm -t atop-rpm-builder .
-          container_id=$(docker create atop-rpm-builder)
+          docker build --build-arg ATOP_VERSION=$ATOP_VERSION -f Dockerfile9.rpm -t atop-rpm9-builder .
+          container_id=$(docker create atop-rpm9-builder)
           mkdir -p build-rpm
           docker cp "$container_id":/build/. ./build-rpm
           docker rm "$container_id"
@@ -72,5 +72,5 @@ jobs:
       - name: Upload .rpm artifact
         uses: actions/upload-artifact@v4
         with:
-          name: atop-rpm-${{ env.ATOP_VERSION }}
+          name: atop-rpm9-${{ env.ATOP_VERSION }}
           path: build-rpm/
