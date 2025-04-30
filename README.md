@@ -14,7 +14,8 @@ The workflow is manually triggered and accepts a version input.
 
 - Dockerfiles must be present at:
   - `Dockerfile.deb` for Debian-based package build
-  - `Dockerfile.rpm` for RPM-based package build
+  - `Dockerfile8.rpm` for RPM-based package build for EL8
+  - `Dockerfile9.rpm` for RPM-based package build for EL9
 - Each Dockerfile must:
   - Accept a `build-arg` named `ATOP_VERSION`
   - Place the built package(s) in `/build` inside the container
@@ -33,8 +34,9 @@ After the build finishes, you can download the generated `.deb` and `.rpm` files
 
 ## 🗂️ Output
 
-- `atop-<version>_amd64.deb`: contains the built `.deb` file(s)
-- `atop-<version>-1.el8.x86_64`: contains the built `.rpm` file(s)
+- `atop-<version>_amd64.deb`: contains the built `.deb` file(s) for Debian
+- `atop-<version>-1.el8.x86_64`: contains the built `.rpm` file(s) for EL8
+- `atop-<version>-1.el9.x86_64`: contains the built `.rpm` file(s) for EL9
 
 ## 💡 Notes
 
