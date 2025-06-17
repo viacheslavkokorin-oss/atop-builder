@@ -6,7 +6,7 @@ on:
       atop_version:
         description: "Version of atop to build"
         required: true
-        default: "2.11.1"
+        default: "2.11.2"
 
 env:
   ATOP_VERSION: ${{ github.event.inputs.atop_version }}
