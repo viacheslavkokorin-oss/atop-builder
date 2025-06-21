@@ -12,9 +12,12 @@ env:
   ATOP_VERSION: ${{ github.event.inputs.atop_version }}
 
 jobs:
-  build-deb-amd64:
-    name: 🏗️ Build .deb package for AMD64
+  build-deb:
+    name: 🏗️ Build .deb packages
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [amd64, arm64]
 
     steps:
       - name: Checkout repository
@@ -26,88 +29,42 @@ jobs:
       - name: Set up QEMU for cross-compilation
         uses: docker/setup-qemu-action@v3
 
-      - name: Build .deb for atop ${{ env.ATOP_VERSION }} (amd64)
+      - name: Build .deb for atop ${{ env.ATOP_VERSION }} (${{ matrix.arch }})
         run: |
           docker buildx build \
-            --platform linux/amd64 \
+            --platform linux/${{ matrix.arch }} \
+            --build-arg ARCH=${{ matrix.arch }} \
             --build-arg ATOP_VERSION=${{ env.ATOP_VERSION }} \
-            --output type=local,dest=build-deb/amd64 \
+            --output type=local,dest=build-deb/${{ matrix.arch }} \
             -f Dockerfile.deb .
 
-      - name: Upload .deb artifact (amd64)
+      - name: Upload .deb artifact (${{ matrix.arch }})
         uses: actions/upload-artifact@v4
         with:
-          name: atop-deb-amd64-${{ env.ATOP_VERSION }}
-          path: build-deb/amd64/*.deb
+          name: atop-deb-${{ matrix.arch }}-${{ env.ATOP_VERSION }}
+          path: build-deb/${{ matrix.arch }}/*.deb
 
-  build-deb-arm64:
-    name: 🏗️ Build .deb package for ARM64
+  build-rpm:
+    name: 🏗️ Building .rpm packages
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        el: [el8, el9]
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Set up QEMU for cross-compilation
-        uses: docker/setup-qemu-action@v3
-
-      - name: Build .deb for atop ${{ env.ATOP_VERSION }} (arm64)
+      - name: Build .rpm file for atop ${{ env.ATOP_VERSION }} (${{ matrix.el }})
         run: |
-          docker buildx build \
-            --platform linux/arm64 \
-            --build-arg ATOP_VERSION=${{ env.ATOP_VERSION }} \
-            --output type=local,dest=build-deb/arm64 \
-            -f Dockerfile.deb .
-
-      - name: Upload .deb artifact (arm64)
-        uses: actions/upload-artifact@v4
-        with:
-          name: atop-deb-arm64-${{ env.ATOP_VERSION }}
-          path: build-deb/arm64/*.deb
-
-  build-rpm8:
-    name: 🏗️ Building .rpm package for EL8
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Build .rpm file for atop ${{ env.ATOP_VERSION }}
-        run: |
-          docker build --build-arg ATOP_VERSION=$ATOP_VERSION -f Dockerfile8.rpm -t atop-rpm8-builder .
-          container_id=$(docker create atop-rpm8-builder)
-          mkdir -p build-rpm
-          docker cp "$container_id":/build/. ./build-rpm
+          docker build --build-arg ATOP_VERSION=$ATOP_VERSION -f Dockerfile_${{ matrix.el }}.rpm -t atop-${{ matrix.el }}-builder .
+          container_id=$(docker create atop-${{ matrix.el }}-builder)
+          mkdir -p build-rpm-${{ matrix.el }}
+          docker cp "$container_id":/build/. ./build-rpm-${{ matrix.el }}
           docker rm "$container_id"
 
-      - name: Upload .rpm artifact
+      - name: Upload .rpm artifact (${{ matrix.el }})
         uses: actions/upload-artifact@v4
         with:
-          name: atop-rpm8-${{ env.ATOP_VERSION }}
-          path: build-rpm/
-
-  build-rpm9:
-    name: 🏗️ Building .rpm package for EL9
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Build .rpm file for atop ${{ env.ATOP_VERSION }}
-        run: |
-          docker build --build-arg ATOP_VERSION=$ATOP_VERSION -f Dockerfile9.rpm -t atop-rpm9-builder .
-          container_id=$(docker create atop-rpm9-builder)
-          mkdir -p build-rpm
-          docker cp "$container_id":/build/. ./build-rpm
-          docker rm "$container_id"
-
-      - name: Upload .rpm artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: atop-rpm9-${{ env.ATOP_VERSION }}
-          path: build-rpm/
+          name: atop-rpm-${{ matrix.el }}-${{ env.ATOP_VERSION }}
+          path: build-rpm-${{ matrix.el }}/
