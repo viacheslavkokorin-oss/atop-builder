@@ -49,7 +49,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        el: [el8, el9]
+        el: [el8, el9, el10]
         arch: [amd64, arm64]
 
     steps:
@@ -67,6 +67,7 @@ jobs:
           docker buildx build \
             --platform linux/${{ matrix.arch }} \
             --build-arg ATOP_VERSION=${{ env.ATOP_VERSION }} \
+            --build-arg EL=${{ matrix.el }} \
             --output type=local,dest=build-rpm/${{ matrix.el }}/${{ matrix.arch }} \
             -f Dockerfile_${{ matrix.el }}.rpm .
 
