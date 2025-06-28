@@ -50,7 +50,8 @@ After the build finishes, you can download the generated `.deb` and `.rpm` files
 
 - The build jobs are completely isolated using Docker — no atop or its dependencies are installed on the host.
 - You can further extend this workflow to automatically upload the built packages to an internal Pulp repository if desired.
+- There is an [Ansible role for atop](https://github.com/chrisvanmeer/ansible-role-atop) available.
 
 ## Author
 
-- Chris van Meer <chris@atcomputing.nl>
+- Chris van Meer - <chris@atcomputing.nl>
