@@ -35,16 +35,16 @@ After the build finishes, you can download the generated `.deb` and `.rpm` files
 
 ## 🗂️ Output
 
-| File Name                           | Platform       | Architecture | Type   | Description                           |
-| ----------------------------------- | -------------- | ------------ | ------ | ------------------------------------- |
-| `atop-<version>_amd64.deb`          | Debian         | amd64        | `.deb` | Built `.deb` package for Debian amd64 |
-| `atop-<version>_arm64.deb`          | Debian         | arm64        | `.deb` | Built `.deb` package for Debian arm64 |
-| `atop-<version>-1.el8.aarch64.rpm`  | EL8 (RHEL 8)   | aarch64      | `.rpm` | Built `.rpm` package for EL8 aarch64  |
-| `atop-<version>-1.el8.x86_64.rpm`   | EL8 (RHEL 8)   | x86_64       | `.rpm` | Built `.rpm` package for EL8 x86_64   |
-| `atop-<version>-1.el9.aarch64.rpm`  | EL9 (RHEL 9)   | aarch64      | `.rpm` | Built `.rpm` package for EL9 aarch64  |
-| `atop-<version>-1.el9.x86_64.rpm`   | EL9 (RHEL 9)   | x86_64       | `.rpm` | Built `.rpm` package for EL9 x86_64   |
-| `atop-<version>-1.el10.aarch64.rpm` | EL10 (RHEL 10) | aarch64      | `.rpm` | Built `.rpm` package for EL10 aarch64 |
-| `atop-<version>-1.el10.x86_64.rpm`  | EL10 (RHEL 10) | x86_64       | `.rpm` | Built `.rpm` package for EL10 x86_64  |
+| File Name                           | Platform       | Architecture | Type   |
+| ----------------------------------- | -------------- | ------------ | ------ |
+| `atop-<version>_amd64.deb`          | Debian         | amd64        | `.deb` |
+| `atop-<version>_arm64.deb`          | Debian         | arm64        | `.deb` |
+| `atop-<version>-1.el8.aarch64.rpm`  | EL8 (RHEL 8)   | aarch64      | `.rpm` |
+| `atop-<version>-1.el8.x86_64.rpm`   | EL8 (RHEL 8)   | x86_64       | `.rpm` |
+| `atop-<version>-1.el9.aarch64.rpm`  | EL9 (RHEL 9)   | aarch64      | `.rpm` |
+| `atop-<version>-1.el9.x86_64.rpm`   | EL9 (RHEL 9)   | x86_64       | `.rpm` |
+| `atop-<version>-1.el10.aarch64.rpm` | EL10 (RHEL 10) | aarch64      | `.rpm` |
+| `atop-<version>-1.el10.x86_64.rpm`  | EL10 (RHEL 10) | x86_64       | `.rpm` |
 
 ## 💡 Notes
 
