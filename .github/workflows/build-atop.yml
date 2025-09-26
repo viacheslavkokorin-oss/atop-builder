@@ -13,11 +13,12 @@ env:
 
 jobs:
   build-deb:
-    name: 🏗️ Build .deb on ${{ matrix.arch }}
+    name: 🏗️ Build .deb for ${{ matrix.deb }} on ${{ matrix.arch }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        arch: [amd64, arm64]
+        arch: [amd64]
+        deb: [deb11, deb12]
 
     steps:
       - name: Checkout repository
@@ -36,21 +37,22 @@ jobs:
             --build-arg ARCH=${{ matrix.arch }} \
             --build-arg ATOP_VERSION=${{ env.ATOP_VERSION }} \
             --output type=local,dest=build-deb/${{ matrix.arch }} \
-            -f Dockerfile.deb .
+            -f Dockerfile_${{ matrix.deb }}.deb .
 
       - name: Upload .deb artifact (${{ matrix.arch }})
         uses: actions/upload-artifact@v4
         with:
-          name: atop-deb-${{ matrix.arch }}-${{ env.ATOP_VERSION }}
-          path: build-deb/${{ matrix.arch }}/*.deb
+          name: atop-deb-${{ matrix.deb }}-${{ matrix.arch }}-${{ env.ATOP_VERSION }}
+          path: build-deb/${{ matrix.deb}}/${{ matrix.arch }}/*.deb
 
   build-rpm:
     name: 🏗️ Build .rpm for ${{ matrix.el }} on ${{ matrix.arch }}
     runs-on: ubuntu-latest
+    if: false
     strategy:
       matrix:
-        el: [el8, el9, el10]
-        arch: [amd64, arm64]
+        el: [el9, el10]
+        arch: [amd64]
 
     steps:
       - name: Checkout repository

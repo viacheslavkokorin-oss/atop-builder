@@ -1,0 +1,44 @@
+FROM debian:11 AS builder
+
+ARG ATOP_VERSION
+ARG ARCH
+ARG DEB
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Europe/Amsterdam
+
+RUN apt update && apt install -y \
+    build-essential wget pkg-config git make zlib1g-dev \
+    libncurses5-dev libglib2.0-dev fakeroot dpkg-dev vim
+
+WORKDIR /usr/src
+RUN wget https://www.atoptool.nl/download/atop-${ATOP_VERSION}.tar.gz \
+    && tar xzf atop-${ATOP_VERSION}.tar.gz
+
+WORKDIR /usr/src/atop-${ATOP_VERSION}
+RUN make \
+    && mkdir -p /tmp/atop-installroot \
+    && mkdir -p /build \
+    && make install DESTDIR=/tmp/atop-installroot
+
+RUN rm -rf /tmp/atop-installroot/lib/ssl && \
+    chmod -R a+rX /tmp/atop-installroot
+
+RUN mkdir -p /tmp/atop-installroot/DEBIAN
+RUN cat << EOF > /tmp/atop-installroot/DEBIAN/control
+Package: atop
+Version: ${ATOP_VERSION}
+Section: admin
+Priority: optional
+Architecture: ${ARCH}
+Maintainer: Gerlof Langeveld
+Homepage: https://www.atoptool.nl
+Description: Advanced interactive system process monitor
+Depends: libc6, zlib1g, libncursesw6, libglib2.0-0
+EOF
+
+RUN dpkg-deb --build /tmp/atop-installroot /build/atop_${ATOP_VERSION}_${ARCH}.deb
+
+CMD ["/bin/bash"]
+
+FROM scratch AS export
+COPY --from=builder /build /
