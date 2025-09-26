@@ -36,7 +36,7 @@ jobs:
             --platform linux/${{ matrix.arch }} \
             --build-arg ARCH=${{ matrix.arch }} \
             --build-arg ATOP_VERSION=${{ env.ATOP_VERSION }} \
-            --output type=local,dest=build-deb/${{ matrix.arch }} \
+            --output type=local,dest=build-deb/${{ matrix.deb }}/${{ matrix.arch }} \
             -f Dockerfile_${{ matrix.deb }}.deb .
 
       - name: Upload .deb artifact (${{ matrix.arch }})
