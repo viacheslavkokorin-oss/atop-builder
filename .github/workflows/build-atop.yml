@@ -1,4 +1,4 @@
-name: 📦 Build Atop Linux Packages (.deb & .rpm)
+name: 📦 Build Atop Linux Packages (.deb)
 
 on:
   workflow_dispatch:
@@ -6,7 +6,7 @@ on:
       atop_version:
         description: "Version of atop to build"
         required: true
-        default: "2.12.0"
+        default: "2.12.1"
 
 env:
   ATOP_VERSION: ${{ github.event.inputs.atop_version }}
